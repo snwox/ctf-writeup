@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <nav class="navbar navbar-expand-lg shadow-sm mb-5">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse flex-column justify-content-around align-items-center flex-wrap"
+                id="navbarSupportedContent">
+                <div class="nav-item text-center mb-3 d-flex align-items-center">
+                    {% if node %}
+                    <h3 class="m-0 me-3">RPC</h3>
+                    <button class="btn btn-outline-success text-wrap" type="button" id="rpcButton"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Copy RPC">{{ node.rpc }}</button>
+                    {% else %}
+                    <h1>NO NODE</h1>
+                    {% endif %}
+                </div>
+                <div class="nav-item text-center mb-3 d-flex align-items-center">
+                    {% if node %}
+                    <h3 class="m-0 me-3">Private Key</h3>
+                    <button class="btn btn-outline-success text-wrap" type="button" id="pvKeyButton"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Copy Private Key">{{ node.pvKey
+                        }}</button>
+                    {% else %}
+                    <h1>NO NODE</h1>
+                    {% endif %}
+                </div>
+                <div class="nav-item text-center mb-3 d-flex align-items-center">
+                    {% if node %}
+                    <h3 class="m-0 me-3">Bank Address</h3>
+                    <button class="btn btn-outline-success text-wrap me-3" type="button" id="bankButton"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Copy Bank Address">{{ node.bank
+                        }}</button>
+                    {% else %}
+                    <h1>NO NODE</h1>
+                    {% endif %}
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Source code
+                    </button>
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Bank Source code</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <pre><code class="language-javascript text-start">{{ code }}</code></pre>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="text-success font-weight-bold">PEPE MIXER</h1>
+                <h2>PEPE will mix your tokens</h2>
+                <span id="serviceHelp" class="form-text">
+                    deposit ETH to the Bank, and we'll mix it and send it to the Receiver's Address.
+                </span>
+            </div>
+            <div class="col">
+                <img src="/img/pepe.png" width="100px" height="100px" alt="pepe">
+            </div>
+        </div>
+        <form id="mixForm" method="GET" action="/mix">
+            <div class="row g-3 align-items-center mb-5 mt-5">
+                <div class="col-auto">
+                    <h3>1. Change Network</h3>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-outline-success text-wrap" type="button" id="addNetworkButton"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Add to MetaMask">Change to / Add
+                        PEPE</button>
+                </div>
+                <div class="col-auto">
+                    <span id="networkHelp" class="form-text">
+                        add PEPE network to metamask
+                    </span>
+                </div>
+            </div>
+            <div class="row g-3 align-items-center mb-5 mt-5">
+                <div class="col-auto">
+                    <h3>2. Add Private Key to Metamask and Connect</h3>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-outline-success text-wrap" type="button" id="connectButton"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Connect to Metamask">Connect</button>
+                </div>
+                <div class="col-auto">
+                    <span id="networkHelp" class="form-text">
+                        The Private Key is above. Click your Private Key to copy. !** only connect this account **!
+                    </span>
+                </div>
+            </div>
+            <div class="row g-3 align-items-center mb-5 mt-5">
+                <div class="col-auto">
+                    <h3>3. Receiver's Address</h3>
+                </div>
+                <div class="col-auto">
+                    <input type="text" class="form-control" name="receiver" id="receiverAddress"
+                        aria-describedby="receiverHelp">
+                </div>
+                <div class="col-auto">
+                    <span id="receiverHelp" class="form-text">
+                        Must be 0x...
+                    </span>
+                </div>
+            </div>
+
+            <div class="row g-3 align-items-center mb-5 mt-5">
+                <div class="col-auto">
+                    <h3>4. Amounts</h3>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select" name="amount" id="amountSelect">
+                        <option selected value="1">1</option>
+                        <option value="100">100</option>
+                        <option value="10">10</option>
+                        <option value="0.1">0.1</option>
+                        <option value="0.01">0.01</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <span id="amountHelp" class="form-text">
+                        ETH
+                    </span>
+                </div>
+            </div>
+
+            <div class="row g-3 align-items-center mb-5">
+                <div class="col-auto">
+                    <h3>5. Fee</h3>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select" name="fee">
+                        <option selected value="0.6">0.6%</option>
+                        <option value="0.7">0.7%</option>
+                        <option value="0.8">0.8%</option>
+                        <option value="1.1">1.1%</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <span id="feeHelp" class="form-text">
+                        The higher the fee, the faster the processing speed.
+                    </span>
+                </div>
+            </div>
+            <div class="row g-3 align-items-center mb-5">
+                <div class="col-auto">
+                    <h3>6. Promotion Code</h3>
+                </div>
+                <div class="col-auto">
+                    <input type="text" name="code" class="form-control" aria-describedby="codeHelp">
+                </div>
+                <div class="col-auto">
+                    <span id="codeHelp" class="form-text">
+                        If you have a promotion code, enter it here (base64 encoded)
+                    </span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success pe-md-4 ps-md-4" id="mixButton">Mix coins</button>
+        </form>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+    <div class="bouncingButton" style="position:fixed;">
+        <img src="/img/pepe2.png" width="70px" height="70px" />
+        <p class="m-0">Click ME!</p>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@metamask/detect-provider@2.0.0/dist/index.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const buttons = [document.getElementById('rpcButton'), document.getElementById('pvKeyButton'), document.getElementById('bankButton')];
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                console.log('Text copied to clipboard');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        function showTooltip(button, message) {
+            const tooltip = new bootstrap.Tooltip(button, {
+                trigger: 'manual',
+                title: message,
+                placement: 'top'
+            });
+            tooltip.show();
+            setTimeout(() => {
+                tooltip.dispose();
+            }, 1000);
+        }
+
+        for (let button of buttons) {
+            button.addEventListener('click', function () {
+                copyToClipboard(button.innerText);
+                showTooltip(button, 'Copied!');
+            });
+        }
+
+        document.getElementById('addNetworkButton').addEventListener('click', async () => {
+            try {
+                const provider = await detectEthereumProvider();
+                if (provider) {
+                    const chainIdHex = '0x3039';
+
+                    const currentChainId = await provider.request({ method: 'eth_chainId' });
+
+                    await provider.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: chainIdHex,
+                            chainName: 'PEPE {{node.uuid}}',
+                            rpcUrls: ['{{ node.rpc }}'],
+                            nativeCurrency: {
+                                name: 'ETH',
+                                symbol: 'ETH',
+                                decimals: 18
+                            },
+                        }]
+                    });
+                } else {
+                    console.error('MetaMask is not installed. Please install MetaMask and try again.');
+                }
+            } catch (error) {
+                console.error('An error occurred while adding the network:', error);
+            }
+        });
+
+        document.getElementById('mixButton').addEventListener('click', async (event) => {
+            event.preventDefault();
+            try {
+                const provider = await detectEthereumProvider();
+                if (provider) {
+                    const amount = document.getElementById('amountSelect').value;
+                    const receiverAddress = document.getElementById('receiverAddress').value;
+                    const bankAddress = '{{ node.bank }}';
+                    const accounts = await provider
+                        .request({ method: "eth_requestAccounts" });
+                    console.log(accounts);
+                    console.log(bankAddress, receiverAddress, amount);
+                    const transactionParameters = {
+                        to: bankAddress,
+                        from: accounts[0],
+                        value: '0x' + (parseInt(amount * 1e18)).toString(16), // Convert amount to wei and then to hex
+                    };
+
+                    await provider.request({
+                        method: 'eth_sendTransaction',
+                        params: [transactionParameters],
+                    });
+
+                    document.getElementById('mixForm').submit();
+                } else {
+                    console.error('MetaMask is not installed. Please install MetaMask and try again.');
+                }
+            } catch (error) {
+                console.error('An error occurred while sending the transaction:', error);
+            }
+        });
+
+        document.getElementById('connectButton').addEventListener('click', async (event) => {
+            event.preventDefault();
+            try {
+                const provider = await detectEthereumProvider();
+                if (provider) {
+                    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+                    console.log(accounts);
+                } else {
+                    console.error('MetaMask is not installed. Please install MetaMask and try again.');
+                }
+            } catch (error) {
+                console.error('An error occurred while connecting to MetaMask:', error);
+            }
+        })
+
+        const buttonss = document.getElementsByClassName('bouncingButton');
+
+        for (let button of buttonss) {
+            (function (button) {
+                let posX = Math.random() * (window.innerWidth - button.offsetWidth);
+                let posY = Math.random() * (window.innerHeight - button.offsetHeight);
+                let velocityX = 2 + Math.random() * 3;
+                let velocityY = 2 + Math.random() * 3;
+
+                function updatePosition() {
+                    posX += velocityX;
+                    posY += velocityY;
+
+                    if (posX <= 0 || posX >= window.innerWidth - button.offsetWidth) {
+                        velocityX *= -1;
+                    }
+
+                    if (posY <= 0 || posY >= window.innerHeight - button.offsetHeight) {
+                        velocityY *= -1;
+                    }
+
+                    button.style.left = `${posX}px`;
+                    button.style.top = `${posY}px`;
+                }
+
+                button.style.left = `${posX}px`;
+                button.style.top = `${posY}px`;
+                setInterval(updatePosition, 10);
+
+                button.addEventListener('click', () => {
+                    window.open('/vip')
+                });
+            })(button);
+        }
+
+    });
+
+</script>
+{% endblock %}

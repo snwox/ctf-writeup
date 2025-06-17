@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="text-center">
+        <div class="row g-3 align-items-center mb-5 mt-5">
+            <h3>Pending balance: <span class="text-danger">{{ balance }}</span> ETH</h3>
+        </div>
+
+        <div class="row g-3 align-items-center mb-5 mt-5">
+            <div class="col">
+                <h3>Your Receipt</h3>
+            </div>
+            <div class="col">
+                <button class="btn btn-outline-success text-wrap" type="button" id="downloadReceipt"
+                    data-bs-toggle="tooltip" data-bs-placement="top" title="Download Receipt">Download Receipt</button>
+            </div>
+            <span id="receiptHelp" class="form-text">
+
+            </span>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('downloadReceipt').addEventListener('click', function() {
+        fetch(`/download?amount={{amount}}&receiver={{receiver}}&fee={{fee}}&code={{code}}`)
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'receipt.txt'; // 원하는 파일 이름으로 변경
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => console.error('Error downloading the file:', error));
+    });
+    </script>
+{% endblock %}

@@ -1,0 +1,6 @@
+flask-cors
+gunicorn
+flask
+web3
+flask_session
+python-memcached

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="text-center">
+        <button type="button" id="launchButton" class="btn btn-primary">Launch Node ( timeout: 15m ) </button>
+        <div class="d-block mt-3">
+            <span class="fs-4" id="status"></span>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ticket = "{{ ticket }}";
+        const target = "0000";
+        const status = document.getElementById('status');
+        const launchButton = document.getElementById('launchButton');
+
+        launchButton.addEventListener('click', function () {
+            status.textContent = "mining...";
+            setTimeout(findValidNumber, 0);
+        });
+
+        function findValidNumber() {
+            let found = false;
+            let randomValue, hash;
+            while (!found) {
+                randomValue = Math.floor(Math.random() * 1000000000);
+                hash = CryptoJS.SHA256(ticket + randomValue).toString(CryptoJS.enc.Hex);
+                status.textContent = `Current Value: ${randomValue}, Hash: ${hash}`;
+                if (hash.startsWith(target)) {
+                    found = true;
+                    status.textContent = "launching node... takes a minutes...";
+                    launchRequest(randomValue);
+                }
+            }
+        }
+
+        function launchRequest(answer) {
+            fetch('/launch', {
+                headers: { "Content-Type": "application/json" },
+                method: 'POST',
+                body: JSON.stringify({ answer: answer }),
+                credentials: "include"
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/';
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data && !response.ok) {
+                        status.textContent = "launch false, refresh page and try again. If not works again, contact to admin.";
+                    }
+                })
+                .catch(() => {
+                    status.textContent = "launch false, try again. IF not works agian, contact to admin.";
+                });
+        }
+    });
+</script>
+{% endblock %}

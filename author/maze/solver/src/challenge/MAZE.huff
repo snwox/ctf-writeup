@@ -1,0 +1,88 @@
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xe0 shr 0xdeadbeef eq DEADBEEF jumpi
+
+    MAZE jump
+        
+    DEADBEEF:
+        0x00 sload 0x00 mstore
+        0x20 0x00 return
+
+    MAZE:
+        0x41327924f1b91fe820120120804b93f9248e3926010092082080000036fbefb8 0x00 mstore
+        0x8c4f3a002402480003238db6237239920124124120b1db1249271c6412092400 0x20 mstore
+        0x24904920be1b9249246fa082092492003238e493c6fc9900120804824b7e47e4 0x40 mstore
+        0xf9fb9ff9dc9804020920904b927ee49249da0804004920131c9230c30c499048 0x60 mstore
+        0x260920100904132493f7230df1904804120804c7e3fe7fe3e264020000000831 0x80 mstore
+        0x4000b7279ff93bee64100000820831f11bf1c93ce804920104800ced89e7718f 0xa0 mstore
+        0x13feff7ff7ffe80080400 0xc0 mstore
+    
+    // start = 11, 23
+    0x232 0x140 mstore // Y*49+X
+
+    0x00 0x100 mstore
+    LOOP:
+        0x100 mload dup1 calldatasize eq END jumpi 
+        0x01 swap1 0x120 calldatacopy 0x120 mload 0xf8 shr // get userinput
+        dup1 0x77 eq W jumpi // w
+        dup1 0x61 eq A jumpi // a
+        dup1 0x73 eq S jumpi // s
+        dup1 0x64 eq D jumpi // d
+
+        W:
+            0x100 0x31 0x140 mload sub 0x650 swap1 mod dup1 dup1 
+            swap3 
+            swap1 
+            div 0x20 mul 
+            mload 
+            swap1 
+            0x100 swap1 mod shr 0x1 swap1 and 0x1 eq FAIL jumpi
+            0x140 mstore pop
+            0x100 mload 0x01 add 0x100 mstore
+            LOOP jump
+        A:
+            0x100 0x1 0x140 mload sub 0x650 swap1 mod dup1 dup1 
+            swap3 
+            swap1 
+            div 0x20 mul 
+            mload 
+            swap1 
+            0x100 swap1 mod shr 0x1 swap1 and 0x1 eq FAIL jumpi
+            0x140 mstore pop
+            0x100 mload 0x01 add 0x100 mstore
+            LOOP jump
+        S:
+            0x100 0x31 0x140 mload add 0x650 swap1 mod dup1 dup1 
+            swap3 
+            swap1 
+            div 0x20 mul 
+            mload 
+            swap1 
+            0x100 swap1 mod shr 0x1 swap1 and 0x1 eq FAIL jumpi
+            0x140 mstore pop
+            0x100 mload 0x01 add 0x100 mstore
+            LOOP jump
+        D:
+            0x100 0x1 0x140 mload add 0x650 swap1 mod dup1 dup1 
+            swap3 
+            swap1 
+            div 0x20 mul 
+            mload 
+            swap1 
+            0x100 swap1 mod shr 0x1 swap1 and 0x1 eq FAIL jumpi
+            0x140 mstore pop
+            0x100 mload 0x01 add 0x100 mstore
+            LOOP jump
+
+        
+    END:
+        0x140 mload 0x64f eq SUCCESS jumpi
+        FAIL jump
+        
+    SUCCESS:
+        0x1 0x0 sstore
+        stop
+
+    FAIL:
+        stop
+}
+

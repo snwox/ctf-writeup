@@ -1,0 +1,10 @@
+version: '3'
+services:
+  master_of_calculator:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - SECRET_KEY_BASE=hi

@@ -1,0 +1,161 @@
+#define macro CONSTRUCTOR() = takes(1) returns(1) {
+        0x20 0x24e 0x00 codecopy
+        0x00 mload 0x60 shr 0x00 sstore
+        0x20 0x262 0x00 codecopy
+        0x00 mload 0x60 shr 0x01 sstore
+        0x250 dup1          // 0x212: code size
+        0x27 returndatasize // 0xA : code start
+        codecopy	
+        returndatasize	
+        return
+}
+
+#define macro MAIN() = takes(1) returns(1) {
+    0x80 0x40 mstore
+
+    0x40 mload dup1
+    0x140 add 0x40 mstore    
+    
+    // 1. XOR operation (jumps to A1)
+    AA:
+    0x03 callvalue xor 0x01 eq A1 jumpi
+        A2 jump
+        A1:
+        // dest -> offset -> size
+            dup1 0x30 add 0x54 0xa swap2 calldatacopy // this
+            BB jump
+        A2:
+            dup1 0x54 add 0x3a 0x6 swap2 calldatacopy
+
+    // 2. AND operation (jumps to B1)
+    BB:
+    callvalue 0xF0 and 0x00 eq B1 jumpi
+        B2 jump
+        B1:
+            dup1 0x26 add 0x40 0xa swap2 calldatacopy
+            CC jump
+        B2:
+            dup1 0x4a add 0x24 0x6 swap2 calldatacopy
+
+    // 3. OR operation (jumps to C1)
+    CC:
+    callvalue 0x55 or 0x57 eq C1 jumpi
+        C2 jump
+        C1:
+            dup1 0x44 add 0x0a 0x10 swap2 calldatacopy
+            DD jump
+                
+        C2:
+            
+            dup1 0x24 add 0x10 0x10 swap2 calldatacopy
+
+    DD:
+    callvalue 0x08 add 0x10 eq D1 jumpi
+        D2 jump
+        D1:
+            
+            dup1 0x5a add 0x30 0x6 swap2 calldatacopy
+            EE jump
+        D2:
+            dup1 0x1c add 0x4a 0xa swap2 calldatacopy // this
+
+    // 22222
+    EE:
+    0x0A callvalue sub 0x07 eq E1 jumpi
+        E2 jump
+        E1: 
+            
+            dup1 0x44 add 0x1a 0x06 swap2 calldatacopy
+            FF jump
+        E2: 
+            dup1 0x06 add 0x5E 0x06 swap2 calldatacopy //this
+
+    // 6. Multiplication (jumps to F2)
+    FF:
+    0x04 callvalue mul 0x0D eq F1 jumpi
+        F2 jump
+        F1:
+            
+            dup1 0x10 add 0x2a 0xa swap2 calldatacopy
+            GG jump
+        F2:
+            dup1 0x0c add 0x3a 0x06 swap2 calldatacopy
+
+    // 7. Division (jumps to G2)
+    GG:
+    0x0F callvalue div 0x05 eq G1 jumpi
+        G2 jump
+        G1:
+            
+            dup1 0x24 add 0x10 0xa swap2 calldatacopy
+            HH jump
+        G2:
+            dup1 0x12 add 0x20 0xa swap2 calldatacopy
+
+    // 8. Modulo (jumps to H2)
+    HH:
+    0x1 callvalue mod 0x02 eq H1 jumpi
+        H2 jump
+        H1:
+            dup1 0x40 add 0x20 0x6 swap2 calldatacopy
+            II jump
+        H2:
+            dup1 0x54 add 0x2a 0x10 swap2 calldatacopy
+
+    // 9. Left shift (jumps to I2)
+    II:
+    0x01 callvalue shl 0x09 eq I1 jumpi
+        I2 jump
+        I1:
+            
+            dup1 0x00 add 0x32 0x06 swap2 calldatacopy
+            JJ jump
+        I2:
+            dup1 0x3a add 0x00 0xa swap2 calldatacopy // this
+
+    // 1111
+    JJ:
+    0x10 callvalue shr 0x04 eq J1 jumpi
+        J2 jump
+        J1: 
+            dup1 0x00 add 0x1A 0x06 swap2 calldatacopy // this
+            FINAL jump
+        J2:
+            
+            dup1 0x20 add 0x6 0xa swap2 calldatacopy
+
+
+    FINAL:
+    dup1 0x64 add 0x64 0x20 swap2 calldatacopy
+
+
+    dup1 0x20 add mload 0xe0 shr // sig 0x80
+    dup1 0xad9a3eb4 eq swap1 // addliquidity 
+    dup1 0x680b1d07 eq swap1 // removeliquidity
+    dup1 0x095ea7b3 eq swap1 // approve
+    dup1 0xc037646a eq swap1 pop // swap
+    add add add 0x00 eq ERROR jumpi
+
+    dup1 mload 0x60 shr    // addr  80
+    dup1 0x00 sload eq swap1        // addr eq  80
+    0x01 sload eq // eq eq 80
+    add 0x00 eq ERROR jumpi
+
+    0x00 // retsize
+    0x00 // restoffset
+    0x64 // argsize
+    0xa0 // argOffset
+    dup5 mload 0xffffffffffffffffffffffff and // value
+    dup6 mload 0x60 shr // address
+    gas
+    call
+
+    STOP jump
+
+    ERROR:
+    stop
+
+    STOP:
+    stop
+}
+

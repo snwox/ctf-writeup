@@ -1,0 +1,79 @@
+<div class="left">
+<%= form_with url: calculate_fee_path, method: :post do |form| %>
+  <div class="field">
+    <%= form.label :user_leverage, "Choose your leverage (1 - 125):" %>
+    <%= form.range_field :user_leverage, id: 'leverage_range', min: 1,max: 125,step: 1, value: 1 %>
+    <output for="leverage_range" id="leverage_output">1</output>
+    <div id="leverage_values">
+    </div>
+  </div>
+
+  <div class="field">
+    <%= form.label :user_entry_price, "Enter your entry price:" %>
+    <%= form.text_field :user_entry_price, value: 30000 %>
+  </div>
+
+  <div class="field">
+    <%= form.label :user_exit_price, "Enter your exit price:" %>
+    <%= form.text_field :user_exit_price, value: 31337  %>
+  </div>
+
+<div class="field">
+    <%= form.label :user_quantity, "Enter you quentity:" %>
+    <%= form.text_field :user_quantity, value: 1 %>
+</div>
+  <div class="actions">
+    <%= form.submit "Submit" %>
+  </div>
+<% end %>
+</div>
+<div class="right">
+    <div class="calculate_output">
+        <p id="roi"></p>
+        <p id="pnl"></p>
+        <p id="margin"></p>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var slider = document.getElementById('leverage_range');
+    var output = document.getElementById('leverage_output');
+    output.innerHTML = slider.value; 
+
+    slider.oninput = function() {
+        output.innerHTML = this.value != 0 ? this.value : 1;
+        
+        if(this.value == 0) {
+            this.value = 1; 
+            output.innerHTML = 1; 
+        }
+    };
+
+    var form = document.querySelector("form");
+    form.addEventListener("submit", function(event) {
+        event.preventDefault(); 
+
+        const formData = new FormData(form);
+        fetch("/calculate_fee", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json"
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data['response'] == "filtered") {
+                document.querySelector(".calculate_output").innerHTML = "<p>no hack :p</p>"
+            } else {
+                document.querySelector("#roi").innerText = "ROI: " + data['roi'];
+                document.querySelector("#pnl").innerText = "PnL: " + data['pnl'];
+                document.querySelector("#margin").innerText = "Margin: " + data['margin'];
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+});
+</script>
